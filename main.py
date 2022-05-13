@@ -1,312 +1,238 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "Exception in Tkinter callback\n",
-      "Traceback (most recent call last):\n",
-      "  File \"C:\\Users\\leono\\anaconda3\\lib\\tkinter\\__init__.py\", line 1883, in __call__\n",
-      "    return self.func(*args)\n",
-      "  File \"<ipython-input-1-6351e2b40288>\", line 58, in cancel\n",
-      "    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), #конкатенацию пути path и компонентов *paths.\n",
-      "NameError: name '__file__' is not defined\n"
-     ]
-    }
-   ],
-   "source": [
-    "import tkinter\n",
-    "import os\n",
-    "from tkinter import messagebox as mb\n",
-    "from tkinter import messagebox as mb\n",
-    "try:\n",
-    "    f = open(\"save.txt\", 'x') #open for exclusive creation, failing if the file already exists\n",
-    "    hunger = 100\n",
-    "    happy = 100\n",
-    "    result = 0\n",
-    "except FileExistsError:\n",
-    "    f = open(\"save.txt\")\n",
-    "    args = f.readlines()\n",
-    "    hunger = int(args[0])\n",
-    "    happy = int(args[1])\n",
-    "    result = str(args[2])\n",
-    "f.close()\n",
-    "\n",
-    "pressforstart = True\n",
-    "feedflag = 0\n",
-    "playflag = 0\n",
-    "deathflag = 0\n",
-    "\n",
-    "class CustomDialog(object):\n",
-    "    def __init__(self, parent, prompt=\"\", default=\"\"):\n",
-    "        self.popup = tkinter.Toplevel(parent) # окно диалога\n",
-    "        self.popup.title(prompt)\n",
-    "        self.popup.transient(parent)\n",
-    "        #сделать окно зависимым от другого окна, указанного в аргументе. Будет сворачиваться вместе с указанным окном.\n",
-    "        #Без аргументов возвращает текущее значение.\n",
-    "\n",
-    "        self.var = tkinter.StringVar(value=default) # текст в окне\n",
-    "\n",
-    "        label = tkinter.Label(self.popup, text=prompt)\n",
-    "        entry = tkinter.Entry(self.popup, textvariable=self.var) #это виджет, позволяющий пользователю ввести одну строку текста.derwidth\n",
-    "        buttons = tkinter.Frame(self.popup)\n",
-    "        \n",
-    "        buttons.pack(side=\"bottom\", fill=\"x\") #это специальный механизм, который размещает (упаковывает) виджеты на окне\n",
-    "        label.pack(side=\"top\", fill=\"x\", padx=20, pady=10)\n",
-    "        entry.pack(side=\"top\", fill=\"x\", padx=20, pady=10)\n",
-    "\n",
-    "        ok = tkinter.Button(buttons, text=\"Ok\",\n",
-    "                            command=self.popup.destroy) #Метод класса для закрытия окна индикатора\n",
-    "        ok.pack(side=\"top\")\n",
-    "\n",
-    "        self.entry = entry\n",
-    "\n",
-    "    def show(self):\n",
-    "        #Методы  focus_ для управления фокусом ввода с клавиатуры. Виджет, имеющий фокус, получает все события с клавиатуры.\n",
-    "        self.entry.focus_force()\n",
-    "        root.wait_window(self.popup) # ожидание\n",
-    "        return self.var.get() # возвращает строку из StringVar\n",
-    "\n",
-    "\n",
-    "def cancel():\n",
-    "    answer = mb.askyesno(title=\"Start over\",\n",
-    "                         message=\"Are you sure,that you want to start over?\")\n",
-    "    if answer is True:\n",
-    "        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), #конкатенацию пути path и компонентов *paths.\n",
-    "                            'save.txt')\n",
-    "        os.remove(path)\n",
-    "        exit()\n",
-    "\n",
-    "\n",
-    "def exitgame():\n",
-    "    answer = mb.askyesno(title=\"Exit\",\n",
-    "                         message=\"Are you leavig me?\")\n",
-    "    if answer is True:\n",
-    "        root.quit()\n",
-    "\n",
-    "def help():\n",
-    "    file = open('help.txt', encoding=\"utf8\")\n",
-    "    mb.showinfo(\"Help\", file.read())\n",
-    "\n",
-    "def start_game(start):\n",
-    "    global pressforstart\n",
-    "    \n",
-    "    if pressforstart is False:\n",
-    "        pass\n",
-    "    else:\n",
-    "        startLabel.config(text=\"\")\n",
-    "        update_hunger()\n",
-    "        update_happy()\n",
-    "        update_display()\n",
-    "        pressforstart = False\n",
-    "\n",
-    "def update_display():\n",
-    "    global hunger\n",
-    "    global feedflag\n",
-    "    global playflag\n",
-    "\n",
-    "    if deathflag == 1:\n",
-    "        Picture.config(image=death)\n",
-    "        Picture.after(100, update_display) #Таймер\n",
-    "    elif feedflag == 1:\n",
-    "        Picture.config(image=Eating)\n",
-    "    elif playflag == 1:\n",
-    "        Picture.config(image=playing)\n",
-    "    else:\n",
-    "        if hunger >= 80 and happy >= 70:\n",
-    "            Picture.config(image=happyphoto)\n",
-    "        elif hunger >= 50 and happy >= 50:\n",
-    "            Picture.config(image=normalphoto)\n",
-    "        elif hunger < 50:\n",
-    "            Picture.config(image=Hungry)\n",
-    "        elif happy < 50:\n",
-    "            Picture.config(image=sad)\n",
-    "\n",
-    "    hungerLabel.config(text=\"I'm full \" + str(hunger) + \" %\")\n",
-    "    happyLabel.config(text=\"Happines: \" + str(happy) + \" %\")\n",
-    "\n",
-    "    if feedflag == 1:\n",
-    "        Picture.after(1000, update_display)\n",
-    "        feedflag = 0\n",
-    "    elif playflag == 1:\n",
-    "        Picture.after(1000, update_display)\n",
-    "        playflag = 0\n",
-    "    else:\n",
-    "        Picture.after(300, update_display)\n",
-    "\n",
-    "\n",
-    "def update_hunger():\n",
-    "    global hunger\n",
-    "    if hunger > 0:\n",
-    "        hunger -= 1\n",
-    "    if is_alive():\n",
-    "        hungerLabel.after(1000, update_hunger)\n",
-    "\n",
-    "def update_happy():\n",
-    "\n",
-    "    global happy\n",
-    "\n",
-    "    if happy > 0:\n",
-    "        happy -= 1\n",
-    "\n",
-    "    if is_alive():\n",
-    "        happyLabel.after(1000, update_happy)\n",
-    "\n",
-    "def feed():\n",
-    "    global hunger\n",
-    "    global feedflag\n",
-    "\n",
-    "    feedflag = 1\n",
-    "\n",
-    "    if is_alive():\n",
-    "        global hunger\n",
-    "        if hunger <= 93:\n",
-    "            hunger += 7\n",
-    "\n",
-    "def play():\n",
-    "    global happy\n",
-    "    global playflag\n",
-    "\n",
-    "    if is_alive():\n",
-    "        if happy <= 90:\n",
-    "            happy += 10\n",
-    "\n",
-    "    playflag = 1\n",
-    "\n",
-    "def is_alive():\n",
-    "    global hunger\n",
-    "    global deathflag\n",
-    "\n",
-    "    if hunger <= 0:\n",
-    "        deathflag = 1\n",
-    "        startLabel.config(text=(str(result).title()) + \" Dead,noooo\")\n",
-    "        return False\n",
-    "    else:\n",
-    "        return True\n",
-    "\n",
-    "\n",
-    "root = tkinter.Tk()\n",
-    "root.title(\"My petty-pretty\")\n",
-    "root.geometry(\"800x800\")\n",
-    "\n",
-    "startLabel = tkinter.Label(root, text=\"Click enter;)\",\n",
-    "                           font=('Times New Roman', 20))\n",
-    "startLabel.pack()\n",
-    "\n",
-    "hungerLabel = tkinter.Label(root, text=\"I'm full \"\n",
-    "                                       + str(hunger) + \" %\",\n",
-    "                            font=('Times New Roman', 25))\n",
-    "hungerLabel.pack()\n",
-    "\n",
-    "happyLabel = tkinter.Label(root, text=\"Happines: \"\n",
-    "                                      + str(happy) + \" %\",\n",
-    "                           font=('Times New Roman', 25))\n",
-    "happyLabel.pack()\n",
-    "\n",
-    "happyphoto = tkinter.PhotoImage(file=\"Happy.png\")\n",
-    "normalphoto = tkinter.PhotoImage(file=\"NORM.png\")\n",
-    "sad = tkinter.PhotoImage(file=\"SAD.png\")\n",
-    "Hungry = tkinter.PhotoImage(file=\"Hungry.png\")\n",
-    "Eating = tkinter.PhotoImage(file=\"Eating.png\")\n",
-    "playing = tkinter.PhotoImage(file=\"playing.png\")\n",
-    "death = tkinter.PhotoImage(file=\"DEAD.png\")\n",
-    "\n",
-    "Picture = tkinter.Label(root, image=normalphoto)\n",
-    "Picture.pack()\n",
-    "\n",
-    "btnFeed = tkinter.Button(root, text=\"Feed me!\", command=feed,\n",
-    "                         font=('Times New Roman', 20))\n",
-    "btnFeed.place(x=10, y=250)\n",
-    "\n",
-    "btnPlay = tkinter.Button(root, text=\"Play with me!\",\n",
-    "                         command=play, font=('Times New Roman', 20))\n",
-    "btnPlay.place(x=10, y=450)\n",
-    "\n",
-    "mainmenu = tkinter.Menu(root)\n",
-    "root.config(menu=mainmenu)\n",
-    "\n",
-    "filemenu = tkinter.Menu(mainmenu, tearoff=0)\n",
-    "filemenu.add_command(label=\"Cancel all and start again\",\n",
-    "                     command=cancel)\n",
-    "filemenu.add_command(label=\"Exit (autosave,of course)\",\n",
-    "                     command=exitgame)\n",
-    "\n",
-    "helpmenu = tkinter.Menu(mainmenu, tearoff=0)\n",
-    "helpmenu.add_command(label=\"Help\", command=help)\n",
-    "#добавляет элемент меню, который в свою очередь может представлять подменю\n",
-    "mainmenu.add_cascade(label=\"Menu\", menu=filemenu)\n",
-    "mainmenu.add_cascade(label=\" Inquiries\", menu=helpmenu)\n",
-    "\n",
-    "if result == 0:\n",
-    "    dialog = CustomDialog(root, prompt=\"What's my name?\")\n",
-    "    result = dialog.show()\n",
-    "\n",
-    "\n",
-    "nameLabel = tkinter.Label(root, text=\"My name is \" + str(result),\n",
-    "                          font=('Times New Roman', 25))\n",
-    "nameLabel.pack()\n",
-    "\n",
-    "root.bind('<Return>', start_game)\n",
-    "root.mainloop()\n",
-    "\n",
-    "f = open(\"save.txt\", 'w')\n",
-    "args = [hunger, happy, result]\n",
-    "f.writelines(\"%s\\n\" % i for i in args)\n",
-    "f.close()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 4,
-   "metadata": {},
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "[]"
-      ]
-     },
-     "execution_count": 4,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "args"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.8.5"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 4
-}
+import tkinter
+import os
+from tkinter import messagebox as mb
+
+try:
+    f = open("save.txt", 'x') #open for exclusive creation, failing if the file already exists
+    hunger = 100
+    happy = 100
+    result = 0
+except FileExistsError:
+    f = open("save.txt")
+    args = f.readlines()
+    hunger = int(args[0])
+    happy = int(args[1])
+    result = str(args[2])
+f.close()
+
+pressforstart = True
+feedflag = 0
+playflag = 0
+deathflag = 0
+
+class CustomDialog(object):
+    def __init__(self, parent, prompt="", default=""):
+        self.popup = tkinter.Toplevel(parent) # окно диалога
+        self.popup.title(prompt)
+        self.popup.transient(parent)
+        #сделать окно зависимым от другого окна, указанного в аргументе. Будет сворачиваться вместе с указанным окном.
+        #Без аргументов возвращает текущее значение.
+
+        self.var = tkinter.StringVar(value=default) # текст в окне
+
+        label = tkinter.Label(self.popup, text=prompt)
+        entry = tkinter.Entry(self.popup, textvariable=self.var) #это виджет, позволяющий пользователю ввести одну строку текста.derwidth
+        buttons = tkinter.Frame(self.popup)
+        
+        buttons.pack(side="bottom", fill="x") #это специальный механизм, который размещает (упаковывает) виджеты на окне
+        label.pack(side="top", fill="x", padx=20, pady=10)
+        entry.pack(side="top", fill="x", padx=20, pady=10)
+
+        ok = tkinter.Button(buttons, text="Ok",
+                            command=self.popup.destroy) #Метод класса для закрытия окна индикатора
+        ok.pack(side="top")
+
+        self.entry = entry
+
+    def show(self):
+        #Методы  focus_ для управления фокусом ввода с клавиатуры. Виджет, имеющий фокус, получает все события с клавиатуры.
+        self.entry.focus_force()
+        root.wait_window(self.popup) # ожидание
+        return self.var.get() # возвращает строку из StringVar
+
+
+def cancel():
+    answer = mb.askyesno(title="Start over",
+                         message="Are you sure,that you want to start over?")
+    if answer is True:
+        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), #конкатенацию пути path и компонентов *paths.
+                            'save.txt')
+        os.remove(path)
+        exit()
+
+
+def exitgame():
+    answer = mb.askyesno(title="Exit",
+                         message="Are you leavig me?")
+    if answer is True:
+        root.quit()
+
+def help():
+    file = open('help.txt', encoding="utf8")
+    mb.showinfo("Help", file.read())
+
+def start_game(start):
+    global pressforstart
+    
+    if pressforstart is False:
+        pass
+    else:
+        startLabel.config(text="")
+        update_hunger()
+        update_happy()
+        update_display()
+        pressforstart = False
+
+def update_display():
+    global hunger
+    global feedflag
+    global playflag
+
+    if deathflag == 1:
+        Picture.config(image=death)
+        Picture.after(100, update_display) #Таймер
+    elif feedflag == 1:
+        Picture.config(image=Eating)
+    elif playflag == 1:
+        Picture.config(image=playing)
+    else:
+        if hunger >= 80 and happy >= 70:
+            Picture.config(image=happyphoto)
+        elif hunger >= 50 and happy >= 50:
+            Picture.config(image=normalphoto)
+        elif hunger < 50:
+            Picture.config(image=Hungry)
+        elif happy < 50:
+            Picture.config(image=sad)
+
+    hungerLabel.config(text="I'm full " + str(hunger) + " %")
+    happyLabel.config(text="Happines: " + str(happy) + " %")
+
+    if feedflag == 1:
+        Picture.after(1000, update_display)
+        feedflag = 0
+    elif playflag == 1:
+        Picture.after(1000, update_display)
+        playflag = 0
+    else:
+        Picture.after(300, update_display)
+
+
+def update_hunger():
+    global hunger
+    if hunger > 0:
+        hunger -= 1
+    if is_alive():
+        hungerLabel.after(1000, update_hunger)
+
+def update_happy():
+
+    global happy
+
+    if happy > 0:
+        happy -= 1
+
+    if is_alive():
+        happyLabel.after(1000, update_happy)
+
+def feed():
+    global hunger
+    global feedflag
+
+    feedflag = 1
+
+    if is_alive():
+        global hunger
+        if hunger <= 93:
+            hunger += 7
+
+def play():
+    global happy
+    global playflag
+
+    if is_alive():
+        if happy <= 90:
+            happy += 10
+
+    playflag = 1
+
+def is_alive():
+    global hunger
+    global deathflag
+
+    if hunger <= 0:
+        deathflag = 1
+        startLabel.config(text=(str(result).title()) + " Dead,noooo")
+        return False
+    else:
+        return True
+
+
+root = tkinter.Tk()
+root.title("My petty-pretty")
+root.geometry("800x800")
+
+startLabel = tkinter.Label(root, text="Click enter;)",
+                           font=('Times New Roman', 20))
+startLabel.pack()
+
+hungerLabel = tkinter.Label(root, text="I'm full "
+                                       + str(hunger) + " %",
+                            font=('Times New Roman', 25))
+hungerLabel.pack()
+
+happyLabel = tkinter.Label(root, text="Happines: "
+                                      + str(happy) + " %",
+                           font=('Times New Roman', 25))
+happyLabel.pack()
+
+happyphoto = tkinter.PhotoImage(file="Happy.png")
+normalphoto = tkinter.PhotoImage(file="NORM.png")
+sad = tkinter.PhotoImage(file="SAD.png")
+Hungry = tkinter.PhotoImage(file="Hungry.png")
+Eating = tkinter.PhotoImage(file="Eating.png")
+playing = tkinter.PhotoImage(file="playing.png")
+death = tkinter.PhotoImage(file="DEAD.png")
+
+Picture = tkinter.Label(root, image=normalphoto)
+Picture.pack()
+
+btnFeed = tkinter.Button(root, text="Feed me!", command=feed,
+                         font=('Times New Roman', 20))
+btnFeed.place(x=10, y=250)
+
+btnPlay = tkinter.Button(root, text="Play with me!",
+                         command=play, font=('Times New Roman', 20))
+btnPlay.place(x=10, y=450)
+
+mainmenu = tkinter.Menu(root)
+root.config(menu=mainmenu)
+
+filemenu = tkinter.Menu(mainmenu, tearoff=0)
+filemenu.add_command(label="Cancel all and start again",
+                     command=cancel)
+filemenu.add_command(label="Exit (autosave,of course)",
+                     command=exitgame)
+
+helpmenu = tkinter.Menu(mainmenu, tearoff=0)
+helpmenu.add_command(label="Help", command=help)
+#добавляет элемент меню, который в свою очередь может представлять подменю
+mainmenu.add_cascade(label="Menu", menu=filemenu)
+mainmenu.add_cascade(label=" Inquiries", menu=helpmenu)
+
+if result == 0:
+    dialog = CustomDialog(root, prompt="What's my name?")
+    result = dialog.show()
+
+
+nameLabel = tkinter.Label(root, text="My name is " + str(result),
+                          font=('Times New Roman', 25))
+nameLabel.pack()
+
+root.bind('<Return>', start_game)
+root.mainloop()
+
+f = open("save.txt", 'w')
+args = [hunger, happy, result]
+f.writelines("%s\n" % i for i in args)
+f.close()
